@@ -1,0 +1,8 @@
+{
+  "metric": "FID",
+  "fid": 199.60511779785156,
+  "real_image_count": 5985,
+  "synthetic_image_count": 100,
+  "device": "cpu",
+  "image_size": 299
+}

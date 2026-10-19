@@ -1,0 +1,44 @@
+
+# Node / React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Model weights and checkpoints
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+
+# Training outputs and caches
+wandb/
+outputs/
+checkpoints/
+.cache/
+
+# Local editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Exclude full KITTI dataset and training subset
+/data/real/
+/data/training_subset/
+/data/kitti_training_subset.zip
+
+# Exclude local generation outputs
+/generated_images/
+
+

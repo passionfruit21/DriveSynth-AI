@@ -1,0 +1,26 @@
+{
+  "daytime": {
+    "fid": 215.7593994140625,
+    "real_images": 100,
+    "synthetic_images": 25,
+    "reference": "100 clear-daytime KITTI images"
+  },
+  "night": {
+    "fid": 264.2579650878906,
+    "real_images": 100,
+    "synthetic_images": 25,
+    "reference": "100 clear-daytime KITTI images"
+  },
+  "rain": {
+    "fid": 276.9744873046875,
+    "real_images": 100,
+    "synthetic_images": 25,
+    "reference": "100 clear-daytime KITTI images"
+  },
+  "fog": {
+    "fid": 282.6892395019531,
+    "real_images": 100,
+    "synthetic_images": 25,
+    "reference": "100 clear-daytime KITTI images"
+  }
+}

@@ -1,0 +1,13 @@
+filename,condition,prompt,seed,width,height
+daytime_001.png,daytime,"Photorealistic dashboard camera view of a car driving on an urban road, visible cars, clear lane markings, buildings, natural bright daylight, realistic traffic scene",1001,512,512
+daytime_002.png,daytime,"Photorealistic dashboard camera view of a car driving on an urban road, visible cars, clear lane markings, buildings, natural bright daylight, realistic traffic scene",1002,512,512
+daytime_003.png,daytime,"Photorealistic dashboard camera view of a car driving on an urban road, visible cars, clear lane markings, buildings, natural bright daylight, realistic traffic scene",1003,512,512
+night_001.png,night,"Photorealistic dashboard camera view of a car driving on an urban road at night, visible vehicles, streetlights, headlights, realistic nighttime traffic",1004,512,512
+night_002.png,night,"Photorealistic dashboard camera view of a car driving on an urban road at night, visible vehicles, streetlights, headlights, realistic nighttime traffic",1005,512,512
+night_003.png,night,"Photorealistic dashboard camera view of a car driving on an urban road at night, visible vehicles, streetlights, headlights, realistic nighttime traffic",1006,512,512
+rain_001.png,rain,"Photorealistic dashboard camera view of a car driving on a wet urban road during rain, wet asphalt, reflections, visible cars, realistic rainy traffic scene",1007,512,512
+rain_002.png,rain,"Photorealistic dashboard camera view of a car driving on a wet urban road during rain, wet asphalt, reflections, visible cars, realistic rainy traffic scene",1008,512,512
+rain_003.png,rain,"Photorealistic dashboard camera view of a car driving on a wet urban road during rain, wet asphalt, reflections, visible cars, realistic rainy traffic scene",1009,512,512
+fog_001.png,fog,"Photorealistic dashboard camera view of a car driving on an urban road in fog, reduced visibility, vehicles ahead, road markings, realistic foggy traffic scene",1010,512,512
+fog_002.png,fog,"Photorealistic dashboard camera view of a car driving on an urban road in fog, reduced visibility, vehicles ahead, road markings, realistic foggy traffic scene",1011,512,512
+fog_003.png,fog,"Photorealistic dashboard camera view of a car driving on an urban road in fog, reduced visibility, vehicles ahead, road markings, realistic foggy traffic scene",1012,512,512
