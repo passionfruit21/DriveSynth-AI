@@ -1,4 +1,3 @@
-
 import {
   ResponsiveContainer,
   BarChart,
@@ -80,6 +79,9 @@ function App() {
   const [sceneCondition, setSceneCondition] = useState('daytime');
   const [sceneCount, setSceneCount] = useState('4');
   const [generationMessage, setGenerationMessage] = useState('');
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
     
   const averageMetrics = (rows) => {
     const metrics = ['brightness', 'contrast', 'sharpness']
@@ -305,28 +307,25 @@ const resolutionLabel =
             <button
               key={label}
               className={`nav-item ${activeNav === label ? 'active' : ''}`}
-              onClick={() => setActiveNav(label)}
+              onClick={()=> {
+                console.log('Clicked navigation:', label)
+                setActiveNav(label)}}
             >
               <span className="nav-icon">{icon}</span>
               <span>{label}</span>
               {label === 'Synthetic Dataset' && (
-                <span className="nav-count">12</span>
+                <span className="nav-count">100</span>
               )}
             </button>
           ))}
         </nav>
 
+        
         <div className="sidebar-bottom">
-          <div className="system-status">
-            <span className="status-dot" />
-            <div>
-              <div className="status-title">System initialized</div>
-              <div className="status-subtitle">Frontend prototype</div>
-            </div>
-          </div>
           <div className="sidebar-footer">SYNTHETIC DRIVING PROJECT</div>
         </div>
-      </aside>
+        </aside>
+
 
       <main className="main-content">
         <header className="topbar">
@@ -443,19 +442,44 @@ const resolutionLabel =
                 <span className="methodology-meta">KITTI · 500 training images</span>
               </article>
 
+              
               <article className="methodology-card">
                 <span className="methodology-step">02</span>
                 <h3>LoRA fine-tuning</h3>
-                <p>Stable Diffusion 1.5 was fine-tuned in Google Colab using a Tesla T4 GPU and Low-Rank Adaptation (LoRA). The reported training run used 500 steps; generated images were grouped by driving condition.</p>
-                <span className="methodology-meta">Stable Diffusion 1.5 · LoRA · 500 steps</span>
+                <p>
+                  Stable Diffusion 1.5 was fine-tuned in Google Colab using a
+                  Tesla T4 GPU and Low-Rank Adaptation (LoRA). The reported
+                  training run used a 500-image subset of the KITTI dataset
+                  for 500 training steps. The fine-tuned model was then used
+                  to generate driving scenes under daytime, night, rain, and
+                  fog conditions.
+                </p>
+                <span className="methodology-meta">
+                  Stable Diffusion 1.5 · LoRA · 500 training images · 500 steps
+                </span>
               </article>
 
+
+              
               <article className="methodology-card">
                 <span className="methodology-step">03</span>
                 <h3>Controlled FID evaluation</h3>
-                <p>The original and LoRA-generated sets were each evaluated against the same selected 100 real KITTI reference images, using 100 synthetic images per experiment and InceptionV3 features.</p>
-                <div className="methodology-fid-row"><span>Original <strong>210.72</strong></span><span>LoRA <strong>154.50</strong></span></div>
-                <span className="methodology-meta">26.7% lower FID in this comparison</span>
+                <p>
+                  The original and LoRA fine-tuned model outputs were evaluated
+                  using InceptionV3 features against the same selected 100 real
+                  KITTI reference images, with 100 synthetic images per experiment.
+                  Both experiments used the same evaluation settings. Lower FID
+                  indicates greater feature-distribution similarity to the reference
+                  images, but does not by itself establish visual realism or driving
+                  scene safety.
+                </p>
+                <div className="methodology-fid-row">
+                  <span>Original <strong>210.72</strong></span>
+                  <span>LoRA <strong>154.50</strong></span>
+                </div>
+                <span className="methodology-meta">
+                  26.7% lower FID in this controlled comparison
+                </span>
               </article>
 
               <article className="methodology-card methodology-caveat-card">
@@ -481,6 +505,24 @@ const resolutionLabel =
               <div className="image-count"><span className="count-dot" />{images.length} images available</div>
             </section>
           )}
+          
+          {activeNav === 'Real Dataset' && (
+            <section className="section-heading">
+              <div>
+                <div className="eyebrow">DATA EXPLORER</div>
+                <h2>Real Dataset</h2>
+                <p>
+                  Explore real-world driving images from the KITTI dataset
+                  used as reference data for this project.
+                </p>
+              </div>
+              <div className="image-count">
+                <span className="count-dot" />
+                6 real images available
+              </div>
+            </section>
+          )}
+
 
           
           {activeNav === 'Generation Lab' && (
@@ -551,45 +593,187 @@ const resolutionLabel =
                 </select>
 
                 
+                
                 <button
                   type="button"
-                  onClick={() => {
+                  disabled={isGenerating}
+                  onClick={async () => {
                     if (!scenePrompt.trim()) {
                       setGenerationMessage('Please enter a scene description first.');
                       return;
                     }
 
-                    setGenerationMessage(
-                      `Settings ready: ${sceneCount} image(s), ${sceneCondition} condition. Model connection is the next step.`
-                    );
+                    setGenerationMessage('Sending settings to the backend...');
+                    setIsGenerating(true);
+
+                    try {
+                      const response = await fetch('http://127.0.0.1:8000/generate', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          prompt: scenePrompt.trim(),
+                          condition: sceneCondition,
+                          count: Number(sceneCount),
+                        }),
+                      });
+
+                      const data = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(data.detail || 'The backend request failed.');
+                      }
+
+                      setGeneratedImages(
+                        data.images.map((imagePath) => `http://127.0.0.1:8000${imagePath}`)
+                      );
+
+                      setGenerationMessage(
+                        `Successfully generated ${data.count} image(s) for ${data.condition}.`
+                      );
+                    } catch (error) {
+                      setGenerationMessage(
+                        `Could not connect to the backend: ${error.message}`
+                      );
+                    }finally {
+                      setIsGenerating(false);
+                    }
                   }}
                 >
-                  Prepare generation
+                  {isGenerating ? 'Generating images...' : 'Generate Images'}
                 </button>
+
 
                 {generationMessage && (
                   <p role="status" aria-live="polite">
                     {generationMessage}
                   </p>
                 )}
+                
+                {generatedImages.length > 0 && (
+                  <div className="generated-images">
+                    {generatedImages.map((imageUrl, index) => (
+                      <div className="generated-image-card" key={imageUrl}>
+                        <img
+                          src={imageUrl}
+                          alt={`AI-generated driving scene ${index + 1}`}
+                          className="generated-image"
+                        />
+
+                        <button
+                          type="button"
+                          className="download-image-button"
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(imageUrl);
+
+                              if (!response.ok) {
+                                throw new Error('Download failed.');
+                              }
+
+                              const blob = await response.blob();
+                              const downloadUrl = URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+
+                              link.href = downloadUrl;
+                              link.download = `drivesynth-scene-${index + 1}.png`;
+                              document.body.appendChild(link);
+                              link.click();
+                              link.remove();
+
+                              URL.revokeObjectURL(downloadUrl);
+                            } catch (error) {
+                              setGenerationMessage(`Could not download image: ${error.message}`);
+                            }
+                          }}
+                        >
+                          Download Image
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
 
               </div>
             </section>
           )}
 
-          {activeNav !== 'Overview' &&
-            activeNav !== 'Synthetic Dataset' &&
-            activeNav !== 'Generation Lab' && (
-              <div className="prototype-notice">
-                <strong>{activeNav}</strong> is still under development.
-                <button onClick={() => setActiveNav('Overview')}>
-                  Back to overview
-                </button>
+          
+          
+          {activeNav === 'Evaluation' && (
+            <section className="evaluation-page">
+              <div className="section-heading">
+                <div>
+                  <div className="eyebrow">MODEL PERFORMANCE</div>
+                  <h2>Evaluation Results</h2>
+                  <p>Compare the original model with the LoRA fine-tuned model.</p>
+                </div>
               </div>
-            )}
+
+              <div className="evaluation-metrics">
+                <article className="evaluation-card">
+                  <span>Original Model FID</span>
+                  <strong>
+                    {controlledFidResults.original.toFixed(2)}
+                  </strong>
+                  <p>Baseline synthetic image quality</p>
+                </article>
+
+                <article className="evaluation-card">
+                  <span>LoRA Fine-Tuned FID</span>
+                  <strong>
+                    {controlledFidResults.lora.toFixed(2)}
+                  </strong>
+                  <p>Fine-tuned synthetic image quality</p>
+                </article>
+
+                <article className="evaluation-card">
+                  <span>FID Reduction</span>
+                  <strong>{Number(fidReduction).toFixed(1)}%</strong>
+                  <p>Relative change from the original model</p>
+                </article>
+              </div>
+
+              <section className="evaluation-results-panel">
+                <h3>Condition-wise FID Scores</h3>
+                <p>Lower FID indicates greater similarity between feature distributions.</p>
+
+                {!conditionFidResults ? (
+                  <p>Loading evaluation results...</p>
+                ) : (
+                  <div className="evaluation-condition-grid">
+                    {['daytime', 'night', 'rain', 'fog'].map((condition) => {
+                      const result = conditionFidResults[condition]
+
+                      if (!result) return null
+
+                      return (
+                        <article className="evaluation-condition-card" key={condition}>
+                          <span>{condition}</span>
+                          <strong>{Number(result.fid).toFixed(2)}</strong>
+                          <p>
+                            {result.real_images} real · {result.synthetic_images} synthetic
+                          </p>
+                        </article>
+                      )
+                    })}
+                  </div>
+                )}
+              </section>
+
+              <p className="evaluation-note">
+                FID measures feature-distribution similarity. It does not by itself verify
+                driving safety, road geometry, or physical realism.
+              </p>
+            </section>
+          )}
 
 
-          {(activeNav === 'Overview' || activeNav === 'Synthetic Dataset') && (
+
+
+          {(activeNav === 'Overview' || activeNav === 'Synthetic Dataset' || activeNav === 'Real Dataset') && (
             <>
           {activeNav === 'Overview' && (
             <section className="section-heading">
@@ -695,8 +879,8 @@ const resolutionLabel =
                       }}
                     >
                       <img
-                        src={`/synthetic/${selectedSynthetic.folder}/${selectedSynthetic.filename}`}
-                        alt={`Synthetic ${selectedSynthetic.scenario} driving scene`}
+                      src={`/synthetic/${selectedSynthetic.folder}/${selectedSynthetic.filename}`}
+                      alt={`Synthetic ${selectedSynthetic.scenario} driving scene`}                      
                       />
                     </div>
 
@@ -994,17 +1178,41 @@ const resolutionLabel =
               ))}
             </div>
 
+            
             <div className="stat-card">
-              <p>Baseline FID Score</p>
+              <p>Base Model FID</p>
               <h2>
-                {fidResults ? Number(fidResults.fid).toFixed(4) : 'Loading...'}
+                {fidResults?.controlled_comparison
+                  ? Number(fidResults.controlled_comparison.base_model_fid).toFixed(2)
+                  : 'Loading...'}
               </h2>
               <p>
-                {fidResults
-                  ? `${fidResults.real_image_count} real images · ${fidResults.synthetic_image_count} synthetic images`
+                {fidResults?.controlled_comparison
+                  ? `${fidResults.controlled_comparison.real_image_count} real images · ${fidResults.controlled_comparison.synthetic_image_count_per_model} synthetic images per model`
                   : 'Loading evaluation results'}
               </p>
             </div>
+
+            <div className="stat-card">
+              <p>LoRA Fine-Tuned FID</p>
+              <h2>
+                {fidResults?.controlled_comparison
+                  ? Number(fidResults.controlled_comparison.lora_finetuned_fid).toFixed(2)
+                  : 'Loading...'}
+              </h2>
+              <p>Lower FID indicates greater similarity to the reference image distribution.</p>
+            </div>
+
+            <div className="stat-card">
+              <p>Relative FID Decrease</p>
+              <h2>
+                {fidResults?.controlled_comparison
+                  ? `${Number(fidResults.controlled_comparison.relative_fid_decrease_percent).toFixed(1)}%`
+                  : 'Loading...'}
+              </h2>
+              <p>Base model compared with LoRA fine-tuned model.</p>
+            </div>
+
 
             <div
               className="fid-experiment-card"
@@ -1187,11 +1395,16 @@ const resolutionLabel =
                 Condition-wise FID Scores
               </h2>
 
+              
               <p style={{ color: '#aab3c2', fontSize: '13px', lineHeight: 1.6 }}>
                 Original synthetic images compared with 100 clear-daytime KITTI
-                reference images. Lower FID indicates greater feature-distribution
-                similarity. Each condition contains 25 synthetic images.
+                reference images. Each condition contains 25 synthetic images.
+                Lower FID indicates greater feature-distribution similarity, but
+                these scores do not isolate weather-specific realism. Night, rain,
+                and fog results may be affected by differences from the clear-daytime
+                reference distribution.
               </p>
+
 
               {!conditionFidResults ? (
                 <p style={{ color: '#aab3c2' }}>Loading condition-wise results...</p>
@@ -1336,62 +1549,127 @@ const resolutionLabel =
             </>
           )}
 
-          <section className="image-grid">
-            {filteredImages.map((image) => {
-              const scenario = scenarios.find(
-                (item) => item.folder === image.folder,
-              )
+          
+          {activeNav === 'Real Dataset' ? (
+            <>
+              <h2 style={{ color: 'white', padding: '20px' }}>
+                REAL DATASET RENDER TEST
+              </h2>
 
-              return (
-                <article className="image-card" 
-                         key={image.id}
-                         onClick={() => setSelectedImage(image)}
-                         title = "Click to inspect image details">
-                  <div className={`scene-preview scene-${image.folder}`}>
-                    <img
-                      src={`/synthetic/${image.folder}/${image.filename}`}
-                      alt={image.title}
-                      onError={(event) => {
-                        event.currentTarget.style.display = 'none'
-                        event.currentTarget.nextElementSibling.style.display =
-                          'flex'
-                      }}
-                    />
-                    <div className="scene-placeholder">
-                      <span className="placeholder-icon">{scenario.icon}</span>
-                      <span>{scenario.name} driving scene</span>
-                      <small>Image will appear when dataset is connected</small>
-                    </div>
-                    <span
-                      className="scene-badge"
-                      style={{ '--scenario-color': scenario.color }}
+              <section className="image-grid">
+                {realImages.map((filename, index) => {
+                  const image = {
+                    id: `real-${filename}`,
+                    filename,
+                    title: `Real KITTI Image ${index + 1}`,
+                    folder: 'real',
+                    scenario: 'Real Dataset',
+                  }
+
+                  return (
+                    <article
+                      className="image-card"
+                      key={image.id}
+                      onClick={() => setSelectedImage(image)}
+                      title="Click to inspect image details"
                     >
-                      <span /> {image.scenario}
-                    </span>
-                    <span className="image-number">{image.filename}</span>
-                  </div>
-                  <div className="image-card-info">
-                    <div>
-                      <h3>{image.title}</h3>
-                      <p>512 × 512 px <span>·</span> PNG</p>
+                      <div className="scene-preview scene-real">
+                        <img
+                          src={`/real/${filename}`}
+                          alt={image.title}
+                          onError={(event) => {
+                            event.currentTarget.style.display = 'none'
+                          }}
+                        />
+                        <span className="scene-badge">
+                          <span /> Real KITTI
+                        </span>
+                        <span className="image-number">{filename}</span>
+                      </div>
+
+                      <div className="image-card-info">
+                        <div>
+                          <h3>{image.title}</h3>
+                          <p>Real-world image <span>·</span> KITTI</p>
+                        </div>
+                        <button
+                          className="more-button"
+                          title="Show image information"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            setSelectedImage(image)
+                          }}
+                        >
+                          ···
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
+              </section>
+            </>
+          ) : activeNav === 'Synthetic Dataset' ? (
+            <section className="image-grid">
+              {filteredImages.map((image) => {
+                const scenario = scenarios.find(
+                  (item) => item.folder === image.folder
+                )
+
+                return (
+                  <article
+                    className="image-card"
+                    key={image.id}
+                    onClick={() => setSelectedImage(image)}
+                    title="Click to inspect image details"
+                  >
+                    <div className={`scene-preview scene-${image.folder}`}>
+                      <img
+                        src={`/synthetic/${image.folder}/${image.filename}`}
+                        alt={image.title}
+                        onError={(event) => {
+                          event.currentTarget.style.display = 'none'
+                          event.currentTarget.nextElementSibling.style.display = 'flex'
+                        }}
+                      />
+                      <div className="scene-placeholder">
+                        <span className="placeholder-icon">
+                          {scenario?.icon ?? '🚗'}
+                        </span>
+                        <span>{scenario?.name ?? image.scenario} driving scene</span>
+                        <small>Image will appear when dataset is connected</small>
+                      </div>
+                      <span
+                        className="scene-badge"
+                        style={{ '--scenario-color': scenario?.color ?? '#64748b' }}
+                      >
+                        <span /> {image.scenario}
+                      </span>
+                      <span className="image-number">{image.filename}</span>
                     </div>
-                    <button
-                      className="more-button"
-                      title="Show image information"
-                      onClick={(event) =>
-                      {
-                        event.stopPropagation()
-                        setSelectedImage(image)
-                      }
-                      }
-                    >
-                      ···
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
-          </section>
+
+                    <div className="image-card-info">
+                      <div>
+                        <h3>{image.title}</h3>
+                        <p>512 × 512 px <span>·</span> PNG</p>
+                      </div>
+                      <button
+                        className="more-button"
+                        title="Show image information"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setSelectedImage(image)
+                        }}
+                      >
+                        ···
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </section>
+          ) : null}
+
+
 
                
           {selectedImage && (

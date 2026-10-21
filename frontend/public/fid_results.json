@@ -1,8 +1,20 @@
+
 {
   "metric": "FID",
-  "fid": 199.60511779785156,
-  "real_image_count": 5985,
-  "synthetic_image_count": 100,
-  "device": "cpu",
-  "image_size": 299
+  "legacy_result": {
+    "fid": 199.6051,
+    "real_image_count": 5985,
+    "synthetic_image_count": 100,
+    "device": "cpu",
+    "image_size": 299,
+    "note": "Earlier evaluation; not directly comparable to the controlled experiment."
+  },
+  "controlled_comparison": {
+    "real_image_count": 100,
+    "synthetic_image_count_per_model": 100,
+    "base_model_fid": 210.7182,
+    "lora_finetuned_fid": 154.496,
+    "relative_fid_decrease_percent": 26.7,
+    "note": "Same real reference set and evaluation settings for both models."
+  }
 }

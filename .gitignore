@@ -40,3 +40,8 @@ Thumbs.db
 
 # Exclude local generation outputs
 /generated_images/
+
+# Keep backend-generated images for the demo
+!/backend/generated_images/
+
+.env

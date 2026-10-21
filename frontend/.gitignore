@@ -41,4 +41,4 @@ Thumbs.db
 # Exclude local generation outputs
 /generated_images/
 
-
+.env
