@@ -535,13 +535,6 @@ const resolutionLabel =
                 </div>
               </div>
 
-              <div className="prototype-notice">
-                <strong>Model connection pending</strong>
-                <p>
-                  Your Generation Lab interface is being prepared. The trained model
-                  will be connected in a later step.
-                </p>
-              </div>
 
               <div className="generation-form">
                 <label htmlFor="scene-prompt">Scene description</label>
