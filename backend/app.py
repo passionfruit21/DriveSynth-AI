@@ -20,9 +20,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"),
+        "https://drive-synth-ai.vercel.app",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ],
+    allow_origin_regex=r"^https://drive-synth-[a-z0-9-]+-passionfruit2\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
