@@ -2392,3 +2392,30 @@ select:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+
+.screen-recorder {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+}
+
+.recorder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.recorder-actions button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.recorder-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
