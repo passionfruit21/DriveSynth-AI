@@ -99,7 +99,7 @@ FRONTEND_ORIGIN=https://your-vercel-domain.vercel.app
 
 Enter the DriveSynth token in Render's setup prompt or add it later in the service's Environment settings. Do not put it in the Dockerfile, build arguments, or repository. When Colab creates a new token or ngrok URL, update the corresponding Render variables and restart the service.
 
-In Vercel, set `VITE_API_BASE_URL` to the public Render service URL (for example, `https://drivesynth-api.onrender.com`) and redeploy the frontend. This Vite variable is public configuration and must contain only the backend URL, never a secret.
+The frontend automatically uses `https://drivesynth-api.onrender.com` in production builds and `http://127.0.0.1:8000` in development. No Vercel API URL variable is required; redeploy the frontend after merging the code change.
 
 The Docker build context excludes `.env` files and generated outputs. The runtime image receives credentials only from Render's runtime environment. The service automatically deploys after commits to its linked branch.
 
