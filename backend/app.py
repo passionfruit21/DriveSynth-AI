@@ -12,13 +12,17 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=BASE_DIR / ".env", override=True)
+load_dotenv(dotenv_path=BASE_DIR / ".env", override=False)
 
 app = FastAPI(title="DriveSynth AI API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        os.getenv("FRONTEND_ORIGIN", "http://localhost:5173"),
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,7 +60,7 @@ def prepare_generation(request: GenerationRequest):
     if not COLAB_API_URL or not DRIVESYNTH_API_TOKEN:
         raise HTTPException(
             status_code=503,
-            detail="Colab API configuration is missing. Check backend/.env.",
+            detail="Colab API configuration is missing. Set COLAB_API_URL and DRIVESYNTH_API_TOKEN.",
         )
 
     headers = {"X-API-Token": DRIVESYNTH_API_TOKEN}

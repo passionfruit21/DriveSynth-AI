@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: drivesynth-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /
+    autoDeployTrigger: commit
+    envVars:
+      - key: COLAB_API_URL
+        sync: false
+      - key: DRIVESYNTH_API_TOKEN
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false

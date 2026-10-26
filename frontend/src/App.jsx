@@ -13,6 +13,8 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
+
 const scenarios = [
   {
     name: 'Daytime',
@@ -601,7 +603,7 @@ const resolutionLabel =
                     setIsGenerating(true);
 
                     try {
-                      const response = await fetch('http://127.0.0.1:8000/generate', {
+                      const response = await fetch(`${API_BASE_URL}/generate`, {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
@@ -620,7 +622,7 @@ const resolutionLabel =
                       }
 
                       setGeneratedImages(
-                        data.images.map((imagePath) => `http://127.0.0.1:8000${imagePath}`)
+                        data.images.map((imagePath) => `${API_BASE_URL}${imagePath}`)
                       );
 
                       setGenerationMessage(

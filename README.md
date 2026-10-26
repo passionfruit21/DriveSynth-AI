@@ -74,7 +74,7 @@ Open the local URL printed by Vite in your terminal.
 
 Keep the Colab runtime running while using the live generation integration. The public ngrok URL may change when a new tunnel is created.
 
-### 4. Configure the local backend
+### 4. Configure the backend
 
 Create a `backend/.env` file with the current Colab URL and the matching API token:
 
@@ -85,13 +85,31 @@ DRIVESYNTH_API_TOKEN=your_api_token
 
 Replace the example values with your actual values. Never commit `.env` or publish API tokens.
 
-### 5. Start the backend
+The backend loads this file only for local development. Environment variables already provided by the process take precedence.
+
+### 5. Deploy the backend to Render
+
+Create a Blueprint in the Render Dashboard from this repository and select the root-level `render.yaml`. It creates the `drivesynth-api` web service and builds the Dockerfile in `backend/`. Render provides the `PORT` variable automatically. The Blueprint prompts for these values during initial setup:
+
+```env
+COLAB_API_URL=https://your-current-ngrok-url.ngrok-free.app
+DRIVESYNTH_API_TOKEN=your_current_colab_token
+FRONTEND_ORIGIN=https://your-vercel-domain.vercel.app
+```
+
+Enter the DriveSynth token in Render's setup prompt or add it later in the service's Environment settings. Do not put it in the Dockerfile, build arguments, or repository. When Colab creates a new token or ngrok URL, update the corresponding Render variables and restart the service.
+
+In Vercel, set `VITE_API_BASE_URL` to the public Render service URL (for example, `https://drivesynth-api.onrender.com`) and redeploy the frontend. This Vite variable is public configuration and must contain only the backend URL, never a secret.
+
+The Docker build context excludes `.env` files and generated outputs. The runtime image receives credentials only from Render's runtime environment. The service automatically deploys after commits to its linked branch.
+
+### 6. Start the backend locally
 
 Open another terminal from the repository root:
 
 ```bash
 cd backend
-python -m pip install fastapi uvicorn requests python-dotenv
+python -m pip install -r requirements.txt
 python -m uvicorn app:app --reload --host 127.0.0.1 --port 8000
 ```
 
